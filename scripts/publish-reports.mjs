@@ -40,6 +40,7 @@ try {
   await Promise.all([
     copyReportData('ai-hotspot-daily'),
     copyReportData('polymarket-daily'),
+    copyReportData('juya-rss-daily'),
   ])
   await fs.copyFile(
     path.join(reportsDir, 'index.json'),
@@ -78,6 +79,7 @@ try {
       'index.json',
       'ai-hotspot-daily',
       'polymarket-daily',
+      'juya-rss-daily',
     ],
     { cwd: temporaryDir },
   )

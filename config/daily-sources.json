@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "juya-ai-daily",
+      "name": "橘鸦AI早报",
+      "type": "rss",
+      "url": "https://daily.juya.uk/rss.xml",
+      "homepage": "https://daily.juya.uk/",
+      "appliesTo": ["ai-hotspot-daily", "juya-rss-daily"],
+      "dedicatedReportKind": "juya-rss-daily",
+      "enabled": true,
+      "role": "discovery-and-dedicated-report",
+      "cadence": "daily",
+      "requirePrimarySourceVerification": true
+    }
+  ]
+}

@@ -4,12 +4,20 @@ import { fileURLToPath } from 'node:url'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const reportsRoot = path.join(rootDir, 'public', 'reports')
-const reportKinds = ['ai-hotspot-daily', 'polymarket-daily']
+const reportKinds = [
+  'ai-hotspot-daily',
+  'polymarket-daily',
+  'juya-rss-daily',
+]
 const datedMarkdownPattern = /^\d{4}-\d{2}-\d{2}\.md$/
 const reportKindTitles = {
   'ai-hotspot-daily': 'AI 热点日报',
   'polymarket-daily': 'Polymarket 热点日报',
+  'juya-rss-daily': '橘鸦 RSS 追踪日报',
 }
+const reportKindOrder = new Map(
+  reportKinds.map((kind, index) => [kind, index]),
+)
 
 async function exists(targetPath) {
   try {
@@ -54,7 +62,9 @@ const reports = (await Promise.all(reportKinds.map(collectReports)))
   .flat()
   .sort(
     (left, right) =>
-      right.date.localeCompare(left.date) || left.kind.localeCompare(right.kind),
+      right.date.localeCompare(left.date) ||
+      (reportKindOrder.get(left.kind) ?? reportKinds.length) -
+        (reportKindOrder.get(right.kind) ?? reportKinds.length),
   )
 
 const manifest = {

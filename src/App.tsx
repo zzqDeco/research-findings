@@ -2,18 +2,19 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   Bot,
   CalendarDays,
-  FileText,
-  Globe2,
   LineChart,
   RefreshCw,
+  Rss,
   Search,
-  Sparkles,
 } from 'lucide-react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import './App.css'
 
-type ReportKind = 'ai-hotspot-daily' | 'polymarket-daily'
+type ReportKind =
+  | 'ai-hotspot-daily'
+  | 'polymarket-daily'
+  | 'juya-rss-daily'
 type KindFilter = 'all' | ReportKind
 
 type ReportMeta = {
@@ -34,22 +35,26 @@ type LoadState = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
 const kindLabels: Record<ReportKind, string> = {
   'ai-hotspot-daily': 'AI 热点',
   'polymarket-daily': 'Polymarket',
+  'juya-rss-daily': '橘鸦 RSS',
 }
 
 const kindDescriptions: Record<ReportKind, string> = {
   'ai-hotspot-daily': '模型、产品、研究与政策动态',
   'polymarket-daily': '预测市场热点、概率变化与背景',
+  'juya-rss-daily': '橘鸦AI早报 RSS 完整追踪',
 }
 
 const kindIcons: Record<ReportKind, typeof Bot> = {
   'ai-hotspot-daily': Bot,
   'polymarket-daily': LineChart,
+  'juya-rss-daily': Rss,
 }
 
 const filters: Array<{ value: KindFilter; label: string }> = [
   { value: 'all', label: '全部' },
   { value: 'ai-hotspot-daily', label: 'AI 热点' },
   { value: 'polymarket-daily', label: 'Polymarket' },
+  { value: 'juya-rss-daily', label: '橘鸦 RSS' },
 ]
 
 function publicPath(path: string) {
@@ -89,14 +94,6 @@ function formatGeneratedAt(value?: string) {
     hour12: false,
     timeZone: 'Asia/Shanghai',
   }).format(parsed)
-}
-
-function getReportHeadline(report?: ReportMeta) {
-  if (!report) {
-    return '等待第一份日报'
-  }
-
-  return report.title.replace(/^#\s*/, '')
 }
 
 function App() {
@@ -159,7 +156,7 @@ function App() {
   }, [refreshKey])
 
   const reports = useMemo(() => manifest?.reports ?? [], [manifest])
-  const latestReport = reports[0]
+  const latestDate = reports[0]?.date
 
   const filteredReports = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -238,201 +235,214 @@ function App() {
           ...accumulator,
           [report.kind]: accumulator[report.kind] + 1,
         }),
-        { 'ai-hotspot-daily': 0, 'polymarket-daily': 0 } satisfies Record<
-          ReportKind,
-          number
-        >,
+        {
+          'ai-hotspot-daily': 0,
+          'polymarket-daily': 0,
+          'juya-rss-daily': 0,
+        } satisfies Record<ReportKind, number>,
       ),
     [reports],
   )
 
+  const SelectedIcon = selectedReport ? kindIcons[selectedReport.kind] : Bot
+
   return (
-    <main className="app-shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">
-            <Globe2 aria-hidden="true" size={16} />
-            Research Findings
-          </p>
-          <h1>每日情报阅读器</h1>
-          <p className="subtitle">
-            汇总本地生成的 AI 热点与 Polymarket 日报，按日期沉淀为可检索的阅读库。
-          </p>
-        </div>
-        <button
-          type="button"
-          className="icon-button refresh-button"
-          onClick={() => setRefreshKey((value) => value + 1)}
-          title="刷新日报索引"
-          aria-label="刷新日报索引"
-        >
-          <RefreshCw aria-hidden="true" size={18} />
-        </button>
+    <div className="site-shell">
+      <header className="site-header">
+        <nav className="site-nav" aria-label="日报分类">
+          {filters.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              className={kindFilter === filter.value ? 'active' : ''}
+              aria-pressed={kindFilter === filter.value}
+              onClick={() => setKindFilter(filter.value)}
+            >
+              {filter.label}
+            </button>
+          ))}
+          <a
+            className="source-nav-link"
+            href="https://daily.juya.uk/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Rss aria-hidden="true" size={15} />
+            源站
+          </a>
+          <button
+            type="button"
+            className="refresh-button"
+            onClick={() => setRefreshKey((value) => value + 1)}
+            title="刷新日报索引"
+            aria-label="刷新日报索引"
+          >
+            <RefreshCw aria-hidden="true" size={16} />
+          </button>
+        </nav>
       </header>
 
-      <section className="summary-strip" aria-label="日报统计">
-        <div className="metric">
-          <span>全部日报</span>
-          <strong>{reports.length}</strong>
-        </div>
-        <div className="metric">
-          <span>AI 热点</span>
-          <strong>{counts['ai-hotspot-daily']}</strong>
-        </div>
-        <div className="metric">
-          <span>Polymarket</span>
-          <strong>{counts['polymarket-daily']}</strong>
-        </div>
-        <div className="metric wide">
-          <span>索引更新时间</span>
-          <strong>{formatGeneratedAt(manifest?.generatedAt)}</strong>
-        </div>
-      </section>
+      <main className="page-shell">
+        <section className="page-heading" aria-labelledby="page-title">
+          <h1 id="page-title">每日情报</h1>
+          <p>
+            AI {counts['ai-hotspot-daily']} · Polymarket{' '}
+            {counts['polymarket-daily']} · 橘鸦 RSS {counts['juya-rss-daily']} ·
+            更新于 {formatGeneratedAt(manifest?.generatedAt)}
+          </p>
+        </section>
 
-      <div className="workspace">
-        <aside className="sidebar" aria-label="日报列表">
-          <div className="sidebar-header">
-            <div>
-              <p className="section-label">Reports</p>
-              <h2>日报归档</h2>
-            </div>
-            <FileText aria-hidden="true" size={20} />
-          </div>
-
-          <label className="search-box">
-            <Search aria-hidden="true" size={17} />
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="搜索标题、日期或类型"
-            />
-          </label>
-
-          <div className="segmented-control" aria-label="日报类型筛选">
-            {filters.map((filter) => (
-              <button
-                key={filter.value}
-                type="button"
-                className={kindFilter === filter.value ? 'active' : ''}
-                onClick={() => setKindFilter(filter.value)}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="report-list" aria-live="polite">
-            {manifestState === 'loading' && (
-              <div className="state-panel">正在读取日报索引...</div>
-            )}
-
-            {manifestState === 'error' && (
-              <div className="state-panel error">{manifestError}</div>
-            )}
-
-            {manifestState !== 'loading' &&
-              manifestState !== 'error' &&
-              filteredReports.length === 0 && (
-                <div className="state-panel">
-                  {reports.length === 0
-                    ? '还没有日报。下一次 08:00 自动化运行后会出现在这里。'
-                    : '没有匹配当前筛选条件的日报。'}
-                </div>
-              )}
-
-            {filteredReports.map((report) => {
-              const Icon = kindIcons[report.kind]
-              const isSelected = selectedReport?.id === report.id
-
-              return (
-                <button
-                  key={report.id}
-                  type="button"
-                  className={`report-item ${isSelected ? 'selected' : ''}`}
-                  onClick={() => setSelectedId(report.id)}
-                >
-                  <span className="report-kind">
-                    <Icon aria-hidden="true" size={15} />
-                    {kindLabels[report.kind]}
-                  </span>
-                  <strong>{report.title}</strong>
-                  <span className="report-date">
-                    <CalendarDays aria-hidden="true" size={14} />
-                    {formatDate(report.date)}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </aside>
-
-        <section className="reader" aria-label="日报内容">
-          <div className="reader-header">
-            <div>
-              <p className="section-label">
-                {selectedReport ? kindLabels[selectedReport.kind] : '日报内容'}
-              </p>
-              <h2>{getReportHeadline(selectedReport ?? undefined)}</h2>
-              {selectedReport && (
-                <p className="reader-meta">
-                  {formatDate(selectedReport.date)} ·{' '}
-                  {kindDescriptions[selectedReport.kind]}
-                </p>
-              )}
-            </div>
-            {selectedReport && latestReport?.id === selectedReport.id && (
-              <span className="latest-badge">
-                <Sparkles aria-hidden="true" size={15} />
-                最新
+        <div className="workspace">
+          <aside className="archive-panel" aria-label="日报归档">
+            <div className="archive-header">
+              <div>
+                <p className="section-label">Archive</p>
+                <h2>日报归档</h2>
+              </div>
+              <span className="archive-count" title="当前筛选结果">
+                {filteredReports.length}
               </span>
-            )}
-          </div>
+            </div>
 
-          <article className="markdown-frame">
-            {reportState === 'loading' && (
-              <div className="reader-state">正在加载日报内容...</div>
-            )}
+            <label className="search-box">
+              <Search aria-hidden="true" size={16} />
+              <span className="sr-only">搜索日报</span>
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="搜索标题或日期"
+              />
+            </label>
 
-            {reportState === 'error' && (
-              <div className="reader-state error">{reportError}</div>
-            )}
+            <div className="report-list" aria-live="polite">
+              {manifestState === 'loading' && (
+                <div className="state-panel">正在读取日报索引...</div>
+              )}
 
-            {(!selectedReport ||
-              reportState === 'idle' ||
-              reportState === 'empty') && (
-              <div className="reader-state">
-                选择一份日报查看正文；如果列表为空，请等待自动化生成或手动放入 Markdown。
+              {manifestState === 'error' && (
+                <div className="state-panel error">{manifestError}</div>
+              )}
+
+              {manifestState !== 'loading' &&
+                manifestState !== 'error' &&
+                filteredReports.length === 0 && (
+                  <div className="state-panel">
+                    {reports.length === 0
+                      ? '还没有日报。下一次 08:00 自动化运行后会出现在这里。'
+                      : '没有匹配当前条件的日报。'}
+                  </div>
+                )}
+
+              {filteredReports.map((report) => {
+                const Icon = kindIcons[report.kind]
+                const isSelected = selectedReport?.id === report.id
+
+                return (
+                  <button
+                    key={report.id}
+                    type="button"
+                    className={`report-item kind-${report.kind} ${
+                      isSelected ? 'selected' : ''
+                    }`}
+                    aria-pressed={isSelected}
+                    onClick={() => setSelectedId(report.id)}
+                  >
+                    <span className="report-icon">
+                      <Icon aria-hidden="true" size={16} />
+                    </span>
+                    <span className="report-copy">
+                      <strong>{kindLabels[report.kind]}</strong>
+                      <span>
+                        <CalendarDays aria-hidden="true" size={13} />
+                        {formatDate(report.date)}
+                      </span>
+                    </span>
+                    {report.date === latestDate && (
+                      <span className="latest-mark">最新</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </aside>
+
+          <section
+            className={`reader ${
+              selectedReport ? `kind-${selectedReport.kind}` : 'kind-empty'
+            }`}
+            aria-label="日报内容"
+          >
+            {selectedReport && (
+              <div className="issue-meta">
+                <span className="issue-kind">
+                  <SelectedIcon aria-hidden="true" size={15} />
+                  {kindLabels[selectedReport.kind]}
+                </span>
+                <span>{selectedReport.date}</span>
+                <span>{kindDescriptions[selectedReport.kind]}</span>
+                {selectedReport.date === latestDate && (
+                  <span className="latest-label">最新一期</span>
+                )}
               </div>
             )}
 
-            {selectedReport && reportState === 'ready' && (
-              <Markdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  a({ href, children, ...props }) {
-                    const external = href?.startsWith('http')
+            <article className="markdown-frame">
+              {reportState === 'loading' && (
+                <div className="reader-state">正在加载日报内容...</div>
+              )}
 
-                    return (
-                      <a
-                        {...props}
-                        href={href}
-                        target={external ? '_blank' : undefined}
-                        rel={external ? 'noreferrer' : undefined}
-                      >
-                        {children}
-                      </a>
-                    )
-                  },
-                }}
-              >
-                {selectedMarkdown}
-              </Markdown>
-            )}
-          </article>
-        </section>
-      </div>
-    </main>
+              {reportState === 'error' && (
+                <div className="reader-state error">{reportError}</div>
+              )}
+
+              {(!selectedReport ||
+                reportState === 'idle' ||
+                reportState === 'empty') && (
+                <div className="reader-state">
+                  选择一份日报查看正文；如果列表为空，请等待自动化生成。
+                </div>
+              )}
+
+              {selectedReport && reportState === 'ready' && (
+                <Markdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    a({ href, children, ...props }) {
+                      const external = href?.startsWith('http')
+
+                      return (
+                        <a
+                          {...props}
+                          href={href}
+                          target={external ? '_blank' : undefined}
+                          rel={external ? 'noreferrer' : undefined}
+                        >
+                          {children}
+                        </a>
+                      )
+                    },
+                  }}
+                >
+                  {selectedMarkdown}
+                </Markdown>
+              )}
+            </article>
+          </section>
+        </div>
+      </main>
+
+      <footer className="site-footer">
+        <span>北京时间每日 08:00 更新</span>
+        <a
+          href="https://daily.juya.uk/rss.xml"
+          target="_blank"
+          rel="noreferrer"
+        >
+          橘鸦AI早报 RSS
+        </a>
+      </footer>
+    </div>
   )
 }
 
