@@ -6,8 +6,10 @@
   "scripts": {
     "reports:index": "node scripts/generate-report-index.mjs",
     "reports:juya:check": "node scripts/check-juya-rss-date.mjs",
+    "reports:simon:scan": "node scripts/check-fixed-atom-window.mjs --source simon-willison-everything",
     "reports:publish": "npm run reports:index && node scripts/publish-reports.mjs",
     "test:juya": "node --test scripts/juya-rss-date.test.mjs",
+    "test:sources": "node --test scripts/juya-rss-date.test.mjs scripts/atom-feed-window.test.mjs",
     "dev": "npm run reports:index && vite",
     "build": "npm run reports:index && tsc -b && vite build",
     "lint": "eslint .",

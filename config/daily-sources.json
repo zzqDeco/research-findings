@@ -20,6 +20,27 @@
         "stopWhenFound": true
       },
       "requirePrimarySourceVerification": true
+    },
+    {
+      "id": "simon-willison-everything",
+      "name": "Simon Willison's Weblog",
+      "type": "atom",
+      "url": "https://simonwillison.net/atom/everything/",
+      "homepage": "https://simonwillison.net/",
+      "appliesTo": ["ai-hotspot-daily"],
+      "enabled": true,
+      "role": "discovery-and-analysis",
+      "cadence": "continuous",
+      "windowPolicy": {
+        "freshnessField": "published",
+        "durationHours": 24,
+        "updatedEntryPolicy": "track-separately"
+      },
+      "authorityPolicy": {
+        "authorWork": "primary-source",
+        "externalClaims": "commentary-requiring-primary-source"
+      },
+      "requirePrimarySourceVerification": true
     }
   ]
 }
