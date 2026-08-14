@@ -41,6 +41,26 @@
         "externalClaims": "commentary-requiring-primary-source"
       },
       "requirePrimarySourceVerification": true
+    },
+    {
+      "id": "latent-space",
+      "name": "Latent.Space",
+      "type": "rss",
+      "url": "https://www.latent.space/feed",
+      "homepage": "https://www.latent.space/",
+      "appliesTo": ["ai-hotspot-daily"],
+      "enabled": true,
+      "role": "discovery-and-analysis",
+      "cadence": "continuous",
+      "windowPolicy": {
+        "freshnessField": "pubDate",
+        "durationHours": 24
+      },
+      "authorityPolicy": {
+        "originalInterviews": "primary-source-for-attributed-interview",
+        "externalClaims": "editorial-summary-requiring-primary-source"
+      },
+      "requirePrimarySourceVerification": true
     }
   ]
 }
