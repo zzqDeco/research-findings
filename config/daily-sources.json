@@ -12,6 +12,13 @@
       "enabled": true,
       "role": "discovery-and-dedicated-report",
       "cadence": "daily",
+      "timeZone": "Asia/Shanghai",
+      "datePolicy": "exact-calendar-date",
+      "pollWhenMissing": {
+        "enabled": true,
+        "intervalHours": 1,
+        "stopWhenFound": true
+      },
       "requirePrimarySourceVerification": true
     }
   ]

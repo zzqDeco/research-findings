@@ -12,11 +12,17 @@ const temporaryDir = await fs.mkdtemp(
 )
 
 function run(command, args, options = {}) {
+  console.log(`Running: ${command} ${args.join(' ')}`)
   const result = spawnSync(command, args, {
     cwd: options.cwd ?? rootDir,
     encoding: 'utf8',
     stdio: options.capture ? 'pipe' : 'inherit',
+    timeout: options.timeout ?? 120_000,
   })
+
+  if (result.error) {
+    throw new Error(`${command} ${args.join(' ')} failed: ${result.error.message}`)
+  }
 
   if (result.status !== 0) {
     const detail = options.capture
@@ -26,6 +32,19 @@ function run(command, args, options = {}) {
   }
 
   return options.capture ? result.stdout.trim() : ''
+}
+
+function repositoryFromRemote(remoteUrl) {
+  const normalized = remoteUrl.trim().replace(/\.git$/, '')
+  const sshMatch = normalized.match(/^git@github\.com:(.+\/.+)$/)
+  if (sshMatch) return sshMatch[1]
+
+  const url = new URL(normalized)
+  if (url.hostname !== 'github.com') {
+    throw new Error(`Unsupported GitHub remote: ${remoteUrl}`)
+  }
+
+  return url.pathname.replace(/^\//, '')
 }
 
 async function copyReportData(kind) {
@@ -54,11 +73,7 @@ try {
   const remoteUrl = run('git', ['remote', 'get-url', 'origin'], {
     capture: true,
   })
-  const repository = run(
-    'gh',
-    ['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner'],
-    { capture: true },
-  )
+  const repository = repositoryFromRemote(remoteUrl)
   const userName = run('git', ['config', '--get', 'user.name'], {
     capture: true,
   })
