@@ -1,6 +1,27 @@
 {
-  "generatedAt": "2026-09-11T11:15:18.748Z",
+  "generatedAt": "2026-09-12T00:44:17.655Z",
   "reports": [
+    {
+      "id": "ai-hotspot-daily/2026-09-12",
+      "kind": "ai-hotspot-daily",
+      "date": "2026-09-12",
+      "title": "AI 热点日报｜2026-09-12",
+      "path": "/reports/ai-hotspot-daily/2026-09-12.md"
+    },
+    {
+      "id": "polymarket-daily/2026-09-12",
+      "kind": "polymarket-daily",
+      "date": "2026-09-12",
+      "title": "Polymarket 热点日报｜2026-09-12",
+      "path": "/reports/polymarket-daily/2026-09-12.md"
+    },
+    {
+      "id": "juya-rss-daily/2026-09-12",
+      "kind": "juya-rss-daily",
+      "date": "2026-09-12",
+      "title": "橘鸦 RSS 追踪日报｜2026-09-12",
+      "path": "/reports/juya-rss-daily/2026-09-12.md"
+    },
     {
       "id": "ai-hotspot-daily/2026-09-11",
       "kind": "ai-hotspot-daily",
