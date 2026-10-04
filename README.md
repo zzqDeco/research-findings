@@ -44,6 +44,19 @@ public/reports/
 
 源码分支 `main` 不保存日报。`npm run reports:publish` 会将当前日报快照发布到自动生成的 `reports-data` 分支，并触发 GitHub Actions 构建和部署 Project Pages。该数据分支每次都会被新快照替换，不作为日报版本历史。
 
+## 本站 RSS
+
+订阅地址：`https://zzqdeco.github.io/research-findings/reports/rss.xml`。
+这是本站三类日报的全文订阅，不是橘鸦上游订阅。导航和页脚提供入口，HTML 包含 RSS 自动发现标签。
+
+`npm run reports:index`、开发启动和构建都会更新 RSS，保留最新 60 份日报，生成文件继续忽略 Git。条目使用稳定的日报链接与 GUID；迟到补全会更新同一条目内容，不创建重复条目。条目的日期按日报日期的北京时间 08:00 编排，不代表引用新闻的发布时间。`REPORT_SITE_URL` 可覆盖正式站点根地址（包括部署子路径）。
+
+`?report=ai-hotspot-daily%2F2026-09-29` 可直达指定日报；切换文章、分类或搜索结果后会定位新正文，刷新同一文章保留阅读位置。
+
+验证订阅：`npm run test:rss`。
+
+阅读器支持桌面文章目录、移动端折叠归档、正文下载及可展开的采集核验记录。正文中的本站日报链接仍在阅读器内打开。
+
 ## 固定信息源
 
 每日自动化会读取 [`config/daily-sources.json`](./config/daily-sources.json) 中启用的信息源。当前固定追踪：

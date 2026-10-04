@@ -1,6 +1,7 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { generateReportRss } from './lib/report-rss.mjs'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const reportsRoot = path.join(rootDir, 'public', 'reports')
@@ -72,9 +73,20 @@ const manifest = {
   reports,
 }
 
+const rss = await generateReportRss({
+  ...manifest,
+  siteUrl: process.env.REPORT_SITE_URL,
+  readReport: (report) => fs.readFile(
+    path.join(reportsRoot, report.kind, `${report.date}.md`), 'utf8',
+  ),
+})
+
+await fs.writeFile(path.join(reportsRoot, 'rss.xml'), rss)
+
 await fs.writeFile(
   path.join(reportsRoot, 'index.json'),
   `${JSON.stringify(manifest, null, 2)}\n`,
 )
 
 console.log(`Indexed ${reports.length} reports in public/reports/index.json`)
+console.log('Generated public/reports/rss.xml')

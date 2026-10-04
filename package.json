@@ -10,6 +10,7 @@
     "reports:latent-space:scan": "node scripts/check-fixed-rss-window.mjs --source latent-space",
     "reports:publish": "npm run reports:index && node scripts/publish-reports.mjs",
     "test:juya": "node --test scripts/juya-rss-date.test.mjs",
+    "test:rss": "node --test scripts/report-rss.test.mjs",
     "test:sources": "node --test scripts/juya-rss-date.test.mjs scripts/atom-feed-window.test.mjs scripts/rss-feed-window.test.mjs",
     "dev": "npm run reports:index && vite",
     "build": "npm run reports:index && tsc -b && vite build",
@@ -22,7 +23,9 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -65,6 +65,10 @@ try {
     path.join(reportsDir, 'index.json'),
     path.join(temporaryDir, 'index.json'),
   )
+  await fs.copyFile(
+    path.join(reportsDir, 'rss.xml'),
+    path.join(temporaryDir, 'rss.xml'),
+  )
   await fs.writeFile(
     path.join(temporaryDir, 'README.md'),
     '# Generated report data\n\nThis branch is an ephemeral deployment input. Source history lives on `main`.\n',
@@ -92,6 +96,7 @@ try {
       '--',
       'README.md',
       'index.json',
+      'rss.xml',
       'ai-hotspot-daily',
       'polymarket-daily',
       'juya-rss-daily',

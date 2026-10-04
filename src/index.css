@@ -1,13 +1,13 @@
 :root {
   color-scheme: light;
-  --fg: #18181b;
-  --muted: #666b74;
-  --line: #e5e7eb;
-  --soft: #f6f7f9;
-  --accent: #2563eb;
-  --accent-soft: #eff6ff;
+  --fg: #202923;
+  --muted: #677169;
+  --line: #e6eae7;
+  --soft: #f3f6f4;
+  --accent: #267354;
+  --accent-soft: #edf5f0;
   --surface: #ffffff;
-  --background: #fbfbfc;
+  --background: #ffffff;
   --danger: #a33131;
   --danger-soft: #fff0f0;
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
@@ -15,6 +15,7 @@
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   font-family: var(--font-sans);
+  letter-spacing: 0;
   color: var(--fg);
   background: var(--background);
   font-synthesis: none;
