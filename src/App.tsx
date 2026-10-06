@@ -123,6 +123,7 @@ function App() {
   const [loadedReportId, setLoadedReportId] = useState<string | null>(null)
   const readerRef = useRef<HTMLElement>(null)
   const lastDisplayedId = useRef<string | null>(null)
+  const requestedScrollId = useRef<string | null>(null)
   const openedFromLink = useRef(Boolean(selectedId))
   const [selectedMarkdown, setSelectedMarkdown] = useState('')
   const [reportState, setReportState] = useState<LoadState>('idle')
@@ -258,19 +259,22 @@ function App() {
     if (
       !selectedReport ||
       loadedReportId !== selectedReport.id ||
+      archiveOpen ||
       reportState === 'loading' ||
       reportState === 'idle'
     ) {
       return
     }
 
-    if (lastDisplayedId.current !== selectedReport.id) {
-      if (lastDisplayedId.current !== null || openedFromLink.current) {
+    if (lastDisplayedId.current !== selectedReport.id || requestedScrollId.current === selectedReport.id) {
+      if (lastDisplayedId.current !== null || openedFromLink.current || requestedScrollId.current) {
+        if (requestedScrollId.current) readerRef.current?.focus({ preventScroll: true })
         readerRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' })
       }
       lastDisplayedId.current = selectedReport.id
+      requestedScrollId.current = null
     }
-  }, [selectedReport, loadedReportId, reportState])
+  }, [selectedReport, loadedReportId, reportState, archiveOpen])
 
   useEffect(() => {
     if (!selectedReport) return
@@ -308,10 +312,13 @@ function App() {
   [markdownTree])
 
   function selectReport(id: string) {
+    requestedScrollId.current = id
     setSelectedId(id)
     setArchiveOpen(false)
-    if (id === loadedReportId) {
+    if (id === loadedReportId && !archiveOpen) {
+      readerRef.current?.focus({ preventScroll: true })
       readerRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' })
+      requestedScrollId.current = null
     }
   }
 
@@ -366,15 +373,15 @@ function App() {
           <aside id="archive-panel" className={`archive-panel ${archiveOpen ? 'is-open' : ''}`} aria-label="日报归档">
             <div className="archive-header">
               <div>
-                <p className="section-label">THE ARCHIVE</p>
-                <h2>每一天，值得关注</h2>
+                <p className="section-label">DAILY ARCHIVE</p>
+                <h2>日报归档</h2>
               </div>
               <span className="archive-count" title="当前筛选结果">
                 {filteredReports.length}
               </span>
             </div>
 
-            <p className="archive-summary">{reports.length} 份情报 · 三个观察视角</p>
+            <p className="archive-summary">{reports.length} 份日报</p>
             <label className="search-box">
               <Search aria-hidden="true" size={16} />
               <span className="sr-only">搜索日报</span>
@@ -446,6 +453,7 @@ function App() {
               selectedReport ? `kind-${selectedReport.kind}` : 'kind-empty'
             }`}
             aria-label="日报内容"
+            tabIndex={-1}
             id="reader"
           >
             {selectedReport && (
